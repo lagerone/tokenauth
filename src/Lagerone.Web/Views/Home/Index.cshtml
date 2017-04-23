@@ -1,0 +1,43 @@
+﻿<h2>Home</h2>
+
+<div>
+    <button class="test-button">Test authorized web api call</button>
+    <pre class="result-container"></pre>
+</div>
+
+@section scripts
+{
+    <script>
+        (function () {
+            const button = document.querySelector('.test-button');
+            button.addEventListener('click', testApi);
+
+            function testApi(event) {
+                event.preventDefault();
+                const resultContainer = document.querySelector('.result-container');
+                resultContainer.innerHTML = '';
+                const resultPrefix = 'ApiResult:\n\r';
+                const request = new Request('/api/test',
+                {
+                    method: 'get',
+                    credentials: 'include'
+                });
+                return fetch(request)
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(function (result) {
+                        console.log(result);
+                        resultContainer.innerHTML = resultPrefix + result;
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        resultContainer.innerHTML = resultPrefix + error;
+                    });
+            }
+        })();
+    </script>
+}

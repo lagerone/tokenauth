@@ -1,0 +1,13 @@
+﻿@model string
+
+<h2>Log in</h2>
+@if (!string.IsNullOrWhiteSpace(Model))
+{
+    <p>@Model</p>
+}
+
+<form method="post" action="@Url.Action("Post")">
+    @Html.AntiForgeryToken()
+    <input type="email" name="Email" placeholder="your@email.com" />
+    <button type="submit">Send login email</button>
+</form>

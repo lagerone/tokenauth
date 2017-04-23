@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width"/>
+    <title>EmailAuth Demo</title>
+</head>
+<body>
+    <h1>EmailAuth Demo</h1>
+    <div>
+        <a href="@Url.Action("Index", "Home")">Home</a>
+        |
+        <a href="@Url.Action("Index", "Authentication")">Log in</a>
+        |
+        <a href="@Url.Action("LogOff", "Authentication")">Log off</a>
+    </div>
+    <hr />
+    <div>@RenderBody()</div>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
