@@ -50,26 +50,29 @@ namespace Lagerone.TokenAuth.Services
                 throw new ArgumentNullException(nameof(httpResponse));
             }
 
-            var authenticationRequestCookie = _cookieHelper.GetCookieFromRequest(httpRequest,
+            var tokenCookie = _cookieHelper.GetCookieFromRequest(httpRequest,
                 _cookieSettings.TokenCookieName);
-            if (authenticationRequestCookie == null)
+            if (tokenCookie == null)
             {
                 return GetInvalidResponse(AuthenticationStatus.Fail);
             }
 
-            var cookieToken = authenticationRequestCookie.Value;
+            var cookieToken = tokenCookie.Value;
             if (string.IsNullOrWhiteSpace(cookieToken))
             {
                 return GetInvalidResponse(AuthenticationStatus.Fail);
             }
-            _cookieHelper.DeleteCookie(httpResponse, _cookieSettings.TokenCookieName);
-
+            
             var authenticationRequest =
                 await _authenticationRequestRepository.GetRequestByTokens(cookieToken, emailToken);
             if (authenticationRequest == null)
             {
                 return GetInvalidResponse(AuthenticationStatus.Fail);
             }
+
+            // Delete the tokencookie when a authrequest is found. This way a user can request authentication
+            // with old token (e.g. by clicking old authentication link in email) without invalidating the new token.
+            _cookieHelper.DeleteCookie(httpResponse, _cookieSettings.TokenCookieName);
 
             if (authenticationRequest.ExpirationDate < _dateProvider.UtcNow)
             {

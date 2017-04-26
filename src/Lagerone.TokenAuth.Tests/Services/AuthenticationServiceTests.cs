@@ -67,20 +67,6 @@ namespace Lagerone.TokenAuth.Tests.Services
         }
 
         [Test]
-        public async Task Should_delete_request_cookie_from_response()
-        {
-            //Arrange
-            SetupValidRequestCookie();
-
-            //Act
-            await _authenticationService.AuthenticateUser(_httpRequest, _httpResponse, _emailtoken);
-
-            //Assert
-            A.CallTo(() => _cookieHelper.DeleteCookie(_httpResponse, _requestCookieName))
-                .MustHaveHappened(Repeated.Exactly.Once);
-        }
-
-        [Test]
         public async Task Should_get_request_from_database()
         {
             //Arrange
@@ -107,6 +93,37 @@ namespace Lagerone.TokenAuth.Tests.Services
 
             //Assert
             Assert.That(result.AuthenticationStatus, Is.EqualTo(AuthenticationStatus.Fail));
+        }
+
+        [Test]
+        public async Task Should_delete_request_cookie_from_response_when_request_is_found_in_database()
+        {
+            //Arrange
+            SetupValidRequestCookie();
+            SetupAuthRequestRepository(A.Dummy<string>(), A.Dummy<DateTime>());
+
+            //Act
+            await _authenticationService.AuthenticateUser(_httpRequest, _httpResponse, _emailtoken);
+
+            //Assert
+            A.CallTo(() => _cookieHelper.DeleteCookie(_httpResponse, _requestCookieName))
+                .MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Test]
+        public async Task Should_not_delete_request_cookie_from_response_when_no_request_is_found_in_database()
+        {
+            //Arrange
+            SetupValidRequestCookie();
+            A.CallTo(() => _authenticationRequestRepository.GetRequestByTokens(_cookietoken, _emailtoken))
+                .Returns(Task.FromResult<AuthenticationRequest>(null));
+
+            //Act
+            await _authenticationService.AuthenticateUser(_httpRequest, _httpResponse, _emailtoken);
+
+            //Assert
+            A.CallTo(() => _cookieHelper.DeleteCookie(_httpResponse, _requestCookieName))
+                .MustNotHaveHappened();
         }
 
         [Test]
